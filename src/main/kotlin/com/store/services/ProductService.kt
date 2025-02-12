@@ -8,23 +8,14 @@ import org.springframework.stereotype.Service
 @Service
 class ProductService() {
     private val sampleList = mutableListOf(
-        Product(1, "Product1", ProductCategory.FOOD.toLowerCase(), 100),
-        Product(2, "Product2", ProductCategory.GADGET.toLowerCase(), 200),
-        Product(3, "Product3", ProductCategory.OTHER.toLowerCase(), 300),
-        Product(4, "Product4", ProductCategory.BOOK.toLowerCase(), 400)
+        Product(1, "Product1", ProductCategory.FOOD.toLowerCase(), 100,1000),
+        Product(2, "Product2", ProductCategory.GADGET.toLowerCase(), 200,2000),
+        Product(3, "Product3", ProductCategory.OTHER.toLowerCase(), 300,3000),
+        Product(4, "Product4", ProductCategory.BOOK.toLowerCase(), 400,4000),
     )
 
     fun createProduct(product: ProductRequest): Int {
-        if (product.name.isBlank()) {
-            throw IllegalArgumentException("Invalid product name")
-        }
-        if (product.type.isBlank() || !ProductCategory.entries.map { value -> value.toLowerCase() }.contains(product.type)) {
-            throw IllegalArgumentException("Invalid product category")
-        }
-        if (product.inventory !in 1..9999) {
-            throw IllegalArgumentException("Invalid product inventory")
-        }
-        val newProduct = Product((sampleList.size + 1), product.name, product.type, product.inventory)
+        val newProduct = Product((sampleList.size + 1), product.name, product.type, product.inventory,product.cost)
         sampleList.add(newProduct)
         return newProduct.id
     }

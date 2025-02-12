@@ -1,5 +1,6 @@
 package com.store.controllers
 
+import com.store.entities.ProductCategory
 import com.store.entities.ProductRequest
 import com.store.services.ProductService
 import org.springframework.http.HttpStatus
@@ -34,12 +35,7 @@ class Products(private val productService: ProductService) {
     @PostMapping("/products")
     fun createProduct(@RequestBody product: ProductRequest): ResponseEntity<Any> {
         return try {
-            if (product.name.toIntOrNull() != null) {
-                throw IllegalArgumentException("Product name cannot be an integer")
-            }
-            if (product.name.toBooleanStrictOrNull() != null) {
-                throw IllegalArgumentException("Product name cannot be a boolean value")
-            }
+            validateCreateRequest(product)
             val productId = productService.createProduct(product)
             ResponseEntity.status(HttpStatus.CREATED).body(mapOf("id" to productId))
         } catch (e: IllegalArgumentException) {
@@ -52,5 +48,29 @@ class Products(private val productService: ProductService) {
                 )
             )
         }
+    }
+
+    private fun validateCreateRequest(product: ProductRequest) {
+        if (product.name.toIntOrNull() != null) {
+            throw IllegalArgumentException("Product name cannot be an integer")
+        }
+        if (product.name.toBooleanStrictOrNull() != null) {
+            throw IllegalArgumentException("Product name cannot be a boolean value")
+        }
+        if (product.name.isBlank()) {
+            throw IllegalArgumentException("Invalid product name")
+        }
+        if (product.type.isBlank() || !ProductCategory.entries.map { value -> value.toLowerCase() }
+                .contains(product.type)) {
+            throw IllegalArgumentException("Invalid product category")
+        }
+        if (product.inventory !in 1..9999) {
+            throw IllegalArgumentException("Invalid product inventory")
+        }
+        product.cost?.let {
+            if (it < 0) {
+                throw IllegalArgumentException("Invalid product cost")
+            }
+        }?: throw IllegalArgumentException("Invalid product cost")
     }
 }

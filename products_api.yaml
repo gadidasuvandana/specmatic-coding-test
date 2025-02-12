@@ -32,6 +32,7 @@ paths:
                       name: 'XYZ Phone'
                       type: 'gadget'
                       inventory: 2
+                      cost: 1000
         "400":
           description: Bad Request
           content:
@@ -51,6 +52,7 @@ paths:
                   name: iPhone
                   type: gadget
                   inventory: 100
+                  cost: 1000
       responses:
         "201":
           description: POST /products
@@ -77,6 +79,9 @@ components:
       properties:
         name:
           type: string
+        cost:
+          type: number
+          minimum: 0
         type:
           $ref: '#/components/schemas/ProductType'
         inventory:
@@ -87,6 +92,7 @@ components:
         - name
         - type
         - inventory
+        - cost
     ProductType:
       type: string
       title: Product Type
