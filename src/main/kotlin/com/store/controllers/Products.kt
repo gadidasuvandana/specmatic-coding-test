@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 
 
 @RestController
-class Products(private val productService: ProductService){
+class Products(private val productService: ProductService) {
 
     @GetMapping("/products")
     fun getProducts(@RequestParam(required = false) type: String?): ResponseEntity<Any> {
@@ -30,9 +30,16 @@ class Products(private val productService: ProductService){
             )
         }
     }
+
     @PostMapping("/products")
     fun createProduct(@RequestBody product: ProductRequest): ResponseEntity<Any> {
         return try {
+            if (product.name.toIntOrNull() != null) {
+                throw IllegalArgumentException("Product name cannot be an integer")
+            }
+            if (product.name.toBooleanStrictOrNull() != null) {
+                throw IllegalArgumentException("Product name cannot be a boolean value")
+            }
             val productId = productService.createProduct(product)
             ResponseEntity.status(HttpStatus.CREATED).body(mapOf("id" to productId))
         } catch (e: IllegalArgumentException) {

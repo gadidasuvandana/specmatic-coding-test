@@ -6,7 +6,7 @@ import com.store.entities.ProductRequest
 import org.springframework.stereotype.Service
 
 @Service
-class ProductService {
+class ProductService() {
     private val sampleList = mutableListOf(
         Product(1, "Product1", ProductCategory.FOOD.toLowerCase(), 100),
         Product(2, "Product2", ProductCategory.GADGET.toLowerCase(), 200),
@@ -21,7 +21,7 @@ class ProductService {
         if (product.type.isBlank() || !ProductCategory.entries.map { value -> value.toLowerCase() }.contains(product.type)) {
             throw IllegalArgumentException("Invalid product category")
         }
-        if (product.inventory < 0) {
+        if (product.inventory !in 1..9999) {
             throw IllegalArgumentException("Invalid product inventory")
         }
         val newProduct = Product((sampleList.size + 1), product.name, product.type, product.inventory)
