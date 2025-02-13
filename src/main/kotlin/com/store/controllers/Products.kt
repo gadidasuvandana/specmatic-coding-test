@@ -1,7 +1,7 @@
 package com.store.controllers
 
-import com.store.entities.ProductCategory
 import com.store.entities.ProductRequest
+import com.store.entities.ProductTypeResult
 import com.store.services.ProductService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -18,14 +18,13 @@ class Products(private val productService: ProductService) {
 
     @GetMapping("/products")
     fun getProducts(@RequestParam(required = false) type: String?): ResponseEntity<Any> {
-        return try {
-            ResponseEntity.ok(productService.getProducts(type))
-        } catch (e: IllegalArgumentException) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        return when(val productsResult = productService.getProducts(type)){
+            is ProductTypeResult.Success -> ResponseEntity.ok(productsResult.products)
+            is ProductTypeResult.Error -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 mapOf(
                     "timestamp" to LocalDateTime.now().toString(),
                     "status" to HttpStatus.BAD_REQUEST.value(),
-                    "error" to "Invalid request parameter",
+                    "error" to productsResult.message,
                     "path" to "/products"
                 )
             )
@@ -34,43 +33,22 @@ class Products(private val productService: ProductService) {
 
     @PostMapping("/products")
     fun createProduct(@RequestBody product: ProductRequest): ResponseEntity<Any> {
-        return try {
-            validateCreateRequest(product)
-            val productId = productService.createProduct(product)
-            ResponseEntity.status(HttpStatus.CREATED).body(mapOf("id" to productId))
-        } catch (e: IllegalArgumentException) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                mapOf(
-                    "timestamp" to LocalDateTime.now().toString(),
-                    "status" to HttpStatus.BAD_REQUEST.value(),
-                    "error" to "Invalid request body",
-                    "path" to "/products"
-                )
-            )
-        }
-    }
+        return when(val validatedProduct= product.validate()){
+            is ProductRequest.Validator.Success ->
+            {
+                val productId = productService.createProduct(product)
+                ResponseEntity.status(HttpStatus.CREATED).body(mapOf("id" to productId))}
 
-    private fun validateCreateRequest(product: ProductRequest) {
-        if (product.name.toIntOrNull() != null) {
-            throw IllegalArgumentException("Product name cannot be an integer")
-        }
-        if (product.name.toBooleanStrictOrNull() != null) {
-            throw IllegalArgumentException("Product name cannot be a boolean value")
-        }
-        if (product.name.isBlank()) {
-            throw IllegalArgumentException("Invalid product name")
-        }
-        if (product.type.isBlank() || !ProductCategory.entries.map { value -> value.toLowerCase() }
-                .contains(product.type)) {
-            throw IllegalArgumentException("Invalid product category")
-        }
-        if (product.inventory !in 1..9999) {
-            throw IllegalArgumentException("Invalid product inventory")
-        }
-        product.cost?.let {
-            if (it < 0) {
-                throw IllegalArgumentException("Invalid product cost")
+            is ProductRequest.Validator.Error -> {
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    mapOf(
+                        "timestamp" to LocalDateTime.now().toString(),
+                        "status" to HttpStatus.BAD_REQUEST.value(),
+                        "error" to validatedProduct.message,
+                        "path" to "/products"
+                    )
+                )
             }
-        }?: throw IllegalArgumentException("Invalid product cost")
+        }
     }
 }

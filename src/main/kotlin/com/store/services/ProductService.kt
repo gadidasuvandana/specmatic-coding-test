@@ -3,10 +3,11 @@ package com.store.services
 import com.store.entities.Product
 import com.store.entities.ProductCategory
 import com.store.entities.ProductRequest
+import com.store.entities.ProductTypeResult
 import org.springframework.stereotype.Service
 
 @Service
-class ProductService() {
+class ProductService {
     private val sampleList = mutableListOf(
         Product(1, "Product1", ProductCategory.FOOD.toLowerCase(), 100,1000),
         Product(2, "Product2", ProductCategory.GADGET.toLowerCase(), 200,2000),
@@ -20,13 +21,14 @@ class ProductService() {
         return newProduct.id
     }
 
-    fun getProducts(type: String? = null): List<Product> {
+    fun getProducts(type: String?): ProductTypeResult {
         return type?.let {
-            if(!ProductCategory.entries.map { value -> value.toLowerCase() }.contains(it)) {
-                throw IllegalArgumentException("Invalid product category")
+            if (!ProductCategory.entries.map { value -> value.toLowerCase() }.contains(it)) {
+                ProductTypeResult.Error("Invalid product type")
+            } else {
+                ProductTypeResult.Success(getProductsByCategory(it))
             }
-            getProductsByCategory(it)
-        } ?: getAllProducts()
+        } ?: ProductTypeResult.Success(getAllProducts())
     }
 
     private fun getAllProducts(): List<Product> {
