@@ -1,6 +1,6 @@
 package com.store.entities
 
-enum class ProductCategory(name: String) {
+enum class ProductType(name: String) {
     BOOK("book"),
     FOOD("food"),
     GADGET("gadget"),

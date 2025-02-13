@@ -1,7 +1,8 @@
 package com.store.controllers
 
+import com.store.entities.ProductErrorResponse
 import com.store.entities.ProductRequest
-import com.store.entities.ProductTypeResult
+import com.store.entities.ProductsResult
 import com.store.services.ProductService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -14,25 +15,25 @@ import java.time.LocalDateTime
 
 
 @RestController
-class Products(private val productService: ProductService) {
+class ProductsRoute(private val productService: ProductService) {
 
     @GetMapping("/products")
     fun getProducts(@RequestParam(required = false) type: String?): ResponseEntity<Any> {
         return when(val productsResult = productService.getProducts(type)){
-            is ProductTypeResult.Success -> ResponseEntity.ok(productsResult.products)
-            is ProductTypeResult.Error -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                mapOf(
-                    "timestamp" to LocalDateTime.now().toString(),
-                    "status" to HttpStatus.BAD_REQUEST.value(),
-                    "error" to productsResult.message,
-                    "path" to "/products"
+            is ProductsResult.Success -> ResponseEntity.ok(productsResult.products)
+            is ProductsResult.Error -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ProductErrorResponse(
+                    LocalDateTime.now(),
+                    HttpStatus.BAD_REQUEST.value(),
+                    productsResult.message,
+                    "/products"
                 )
             )
         }
     }
 
     @PostMapping("/products")
-    fun createProduct(@RequestBody product: ProductRequest): ResponseEntity<Any> {
+    fun createProducts(@RequestBody product: ProductRequest): ResponseEntity<Any> {
         return when(val validatedProduct= product.validate()){
             is ProductRequest.Validator.Success ->
             {
@@ -41,11 +42,11 @@ class Products(private val productService: ProductService) {
 
             is ProductRequest.Validator.Error -> {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    mapOf(
-                        "timestamp" to LocalDateTime.now().toString(),
-                        "status" to HttpStatus.BAD_REQUEST.value(),
-                        "error" to validatedProduct.message,
-                        "path" to "/products"
+                    ProductErrorResponse(
+                        LocalDateTime.now(),
+                        HttpStatus.BAD_REQUEST.value(),
+                        validatedProduct.message,
+                        "/products"
                     )
                 )
             }
