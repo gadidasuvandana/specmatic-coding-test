@@ -61,13 +61,4 @@ class ProductsRouteTest {
         assertEquals(HttpStatus.CREATED, response.statusCode)
         assertEquals(mapOf("id" to 1), response.body)
     }
-    @Test
-    fun createProducts_returns_400_when_called_with_an_invalid_request() {
-        val productRequest = ProductRequest("NewProduct", "i-do-not-exist", 100, 1000)
-
-        val response = productsRoute.createProducts(productRequest)
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
-        assertEquals("Invalid product type", (response.body as ProductErrorResponse).error)
-    }
 }

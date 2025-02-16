@@ -1,30 +1,38 @@
 package com.store.entities
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Pattern
 
 data class ProductRequest(
-    @JsonProperty("name") val name: String,
-    @JsonProperty("type") val type: String,
-    @JsonProperty("inventory") val inventory: Int,
-    @JsonProperty("cost") val cost: Int?
-) {
-    sealed class Validator {
-        data object Success : Validator()
-        data class Error(val message: String) : Validator()
-    }
+    @JsonProperty("name")
+    @field:NotBlank(message = "Product Name cannot be blank")
+    @field:Pattern(
+        regexp = "^(?!\\d+$)(?!true|false$).*$",
+        message = "Product name cannot be an integer or boolean value"
+    )
+    val name: String,
 
-    fun validate(): Validator {
-        return when {
-            this.name.toIntOrNull() != null -> Validator.Error("Product name cannot be an integer")
-            this.name.toBooleanStrictOrNull() != null -> Validator.Error("Product name cannot be a boolean value")
-            this.name.isBlank() -> Validator.Error("Invalid product name")
-            this.type.isBlank() || !ProductType.entries.map { value -> value.toLowerCase() }
-                .contains(this.type) -> Validator.Error("Invalid product type")
+    @JsonProperty("type")
+    @field:NotBlank(message = "Invalid product type")
+    @field:Pattern(
+        regexp = "book|food|gadget|other",
+        message = "Invalid product type, product type must belong to [book, food, gadget, other]"
+    )
+    val type: String,
 
-            this.inventory !in 1..9999 -> Validator.Error("Invalid product inventory")
-            this.cost == null || this.cost < 0 -> Validator.Error("Invalid product cost")
-            else -> Validator.Success
-        }
-    }
-}
+    @JsonProperty("inventory")
+    @field:Min(value = 1, message = "Invalid product inventory, inventory must be greater than 0")
+    @field:Max(value = 9999, message = "Invalid product inventory,inventory must be less than 10000")
+    val inventory: Int,
+
+    @JsonProperty("cost")
+    @field:NotNull(message = "Product cost cannot be null")
+    @field:Min(value = 0, message = "Invalid product cost,cost must be greater than 0")
+    val cost: Int?
+)
+
 
