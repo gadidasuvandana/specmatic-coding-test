@@ -17,7 +17,6 @@ data class ProductRequest(
     val name: String,
 
     @JsonProperty("type")
-    @field:NotBlank(message = "Invalid product type")
     @field:Pattern(
         regexp = "book|food|gadget|other",
         message = "Invalid product type, product type must belong to [book, food, gadget, other]"

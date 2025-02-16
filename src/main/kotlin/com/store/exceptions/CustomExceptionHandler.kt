@@ -12,13 +12,21 @@ import java.time.LocalDateTime
 class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handleValidationExceptions(ex: MethodArgumentNotValidException): ResponseEntity<ProductErrorResponse> {
-        val errors = ex.bindingResult.allErrors.joinToString(", ") { it.defaultMessage ?: "Invalid input" }
+    fun handleValidationExceptions(ex: Exception): ResponseEntity<ProductErrorResponse> {
+        val errors = when (ex) {
+            is MethodArgumentNotValidException -> ex.bindingResult.allErrors.joinToString(", ") {
+                it.defaultMessage ?: "Invalid input"
+            }
+
+            is IllegalArgumentException -> ex.message ?: "Invalid argument"
+            else -> "Unknown error"
+        }
+
         val errorResponse = ProductErrorResponse(
             LocalDateTime.now(),
             HttpStatus.BAD_REQUEST.value(),
             errors,
-            ex.bindingResult.objectName
+           "/products"
         )
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
     }

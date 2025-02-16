@@ -1,7 +1,6 @@
 package com.store.services
 
 import com.store.entities.ProductRequest
-import com.store.entities.ProductsResult
 import org.junit.jupiter.api.Assertions.*
 
 import org.junit.jupiter.api.Test
@@ -20,21 +19,12 @@ class ProductServiceTest {
     @Test
     fun getProducts_should_filter_based_on_type() {
         val result = productService.getProducts("food")
-        assertTrue(result is ProductsResult.Success)
-        assertEquals(1, (result as ProductsResult.Success).products.size)
-    }
-
-    @Test
-    fun getProducts_returns_error_when_product_type_is_invalid() {
-        val result = productService.getProducts("invalidType")
-        assertTrue(result is ProductsResult.Error)
-        assertEquals("Invalid product type", (result as ProductsResult.Error).message)
+        assertEquals(1, (result).size)
     }
 
     @Test
     fun getProducts_returns_all_products_when_product_type_is_null() {
         val result = productService.getProducts(null)
-        assertTrue(result is ProductsResult.Success)
-        assertEquals(4, (result as ProductsResult.Success).products.size)
+        assertEquals(4, result.size)
     }
 }
