@@ -50,12 +50,16 @@ class ProductServiceTest {
         assertEquals(2, result.size)
 
     }
-
     @Test
-    fun createProduct_should_return_product_id_when_called_with_a_valid_request() {
-        val productRequest = ProductRequest("NewProduct", "food", 100, 1000)
-        val productId = productService.createProduct(productRequest)
-        assertEquals(5, productId)
-    }
+    fun `createProduct should return ID of saved product`() {
+        val productRequest = ProductRequest("Test Product", "Test Type", 10, 100)
+        val productToSave = Product(name = productRequest.name, type = productRequest.type, inventory = productRequest.inventory, cost = productRequest.cost)
+        val savedProduct = Product(id = 1, name = productRequest.name, type = productRequest.type, inventory = productRequest.inventory, cost = productRequest.cost)
 
+        `when`(productRepository.save(productToSave)).thenReturn(savedProduct)
+
+        val returnedId = productService.createProduct(productRequest)
+
+        assertEquals(1, returnedId)
+    }
 }
