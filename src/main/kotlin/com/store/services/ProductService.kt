@@ -3,10 +3,19 @@ package com.store.services
 import com.store.entities.Product
 import com.store.entities.ProductRequest
 import com.store.entities.ProductType
+import com.store.repositories.ProductRepository
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+
 
 @Service
 class ProductService {
+
+    @Autowired
+    private lateinit var productRepository: ProductRepository
+
+    fun getProductsFromRepo():List<Product> = productRepository.findAll()
+
     private val sampleList = mutableListOf(
         Product(1, "Product1", ProductType.FOOD.toLowerCase(), 100, 1000),
         Product(2, "Product2", ProductType.GADGET.toLowerCase(), 200, 2000),
