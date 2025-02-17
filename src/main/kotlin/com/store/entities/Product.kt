@@ -6,7 +6,7 @@ import jakarta.persistence.*
 data class Product(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int,
+    val id: Int=0,
 
     @Column(name = "name")
     val name: String,
@@ -19,4 +19,6 @@ data class Product(
 
     @Column(name = "cost")
     val cost: Int?
-)
+) {
+    constructor() : this(0, "", "", 0, 0)
+}
