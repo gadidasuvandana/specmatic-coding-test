@@ -24,14 +24,28 @@ class ProductServiceTest {
 
 
     @Test
-    fun `getProductsFromRepo should return all products from the repository`() {
+    fun `getProducts should return all products from the repository`() {
         val product1 = Product(1, "Product 1", "Type 1", 10, 100)
         val product2 = Product(2, "Product 2", "Type 2", 20, 200)
         val products = listOf(product1, product2)
 
         `when`(productRepository.findAll()).thenReturn(products)
 
-        val result = productService.getProductsFromRepo()
+        val result = productService.getProducts(null)
+
+        assertEquals(2, result.size)
+
+    }
+    @Test
+    fun `getProducts should filter products by type`() {
+        val product1 = Product(1, "Product 1", "other", 10, 100)
+        val product2 = Product(2, "Product 2", "other", 20, 200)
+        val product3 = Product(2, "Product 3", "food", 20, 200)
+        val products = listOf(product1, product2,product3)
+
+        `when`(productRepository.findAll()).thenReturn(products)
+
+        val result = productService.getProducts("other")
 
         assertEquals(2, result.size)
 
@@ -44,15 +58,4 @@ class ProductServiceTest {
         assertEquals(5, productId)
     }
 
-    @Test
-    fun getProducts_should_filter_based_on_type() {
-        val result = productService.getProducts("food")
-        assertEquals(1, (result).size)
-    }
-
-    @Test
-    fun getProducts_returns_all_products_when_product_type_is_null() {
-        val result = productService.getProducts(null)
-        assertEquals(4, result.size)
-    }
 }

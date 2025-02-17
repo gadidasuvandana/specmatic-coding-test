@@ -14,7 +14,10 @@ class ProductService {
     @Autowired
     private lateinit var productRepository: ProductRepository
 
-    fun getProductsFromRepo():List<Product> = productRepository.findAll()
+    fun getProducts(type: String?):List<Product>{
+        val allProducts = productRepository.findAll()
+        return type?.let { allProducts.filter { it.type == type } }?: allProducts
+    }
 
     private val sampleList = mutableListOf(
         Product(1, "Product1", ProductType.FOOD.toLowerCase(), 100, 1000),
@@ -27,19 +30,5 @@ class ProductService {
         val newProduct = Product((sampleList.size + 1), product.name, product.type, product.inventory, product.cost)
         sampleList.add(newProduct)
         return newProduct.id
-    }
-
-    fun getProducts(type: String?): List<Product> {
-        return type?.let {
-            getProductsByCategory(it)
-        } ?: getAllProducts()
-    }
-
-    private fun getAllProducts(): List<Product> {
-        return sampleList
-    }
-
-    private fun getProductsByCategory(type: String): List<Product> {
-        return sampleList.filter { it.type == type }
     }
 }
